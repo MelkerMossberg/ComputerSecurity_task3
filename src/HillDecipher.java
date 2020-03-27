@@ -73,16 +73,12 @@ class HillDecipherEngine {
     private int[][] parseKeyMatrix(int size, String keyString) {
         String[] textLines = keyString.split("\\R");
         int[][] keyMatix = new int[size][size];
-        if (textLines.length > size) {
-            System.out.println("Key does not match size");
-            return null;
-        }
+        if (textLines.length > size) throw new IllegalArgumentException("The key does not match <blocksize>");
+
         for (int line = 0; line < textLines.length; line++) {
             String[] numbers = textLines[line].split(" ");
-            if (numbers.length > size) {
-                System.out.println("Key does not match size");
-                return null;
-            }
+            if (numbers.length > size) throw new IllegalArgumentException("The key does not match <blocksize>");
+            if (numbers.length != textLines.length) throw new IllegalArgumentException("The key matrix is not square...");
             for (int x = 0; x < size; x++) {
                 try {
                     keyMatix[line][x] = Integer.parseInt(numbers[x]);
@@ -90,7 +86,6 @@ class HillDecipherEngine {
                     System.err.print("One or more key matrix elements cannot be parsed as Integers..");
                     System.exit(1);
                 }
-
             }
         }
         return keyMatix;
