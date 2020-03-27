@@ -99,7 +99,7 @@ class HillCipherEngine {
         LinkedList finalCrypto = new LinkedList();
         try {
             RandomAccessFile fileReader = new RandomAccessFile(plainTextFile, "r");
-            checkIfLastIndexIsNumber(fileReader);
+            validateFormatFirstAndLastIndex(fileReader);
             int tempByte;
             int offset = 0;
             int[] loadedNumbers = new int[blocksize];
@@ -164,8 +164,14 @@ class HillCipherEngine {
         return new Random().nextInt(radix+1);
     }
 
-    private void checkIfLastIndexIsNumber(RandomAccessFile fileReader) {
+    private void validateFormatFirstAndLastIndex(RandomAccessFile fileReader) {
         try {
+            fileReader.seek(0);
+            char firstChar = ((char) (int) fileReader.read());
+            if (firstChar < 48 || firstChar > 57) {
+                System.err.print(firstChar + "Formatting of first character in input file is wrong.");
+                System.exit(1);
+            }
             fileReader.seek(fileReader.length() - 1);
             char lastChar = ((char) (int) fileReader.read());
             if (lastChar < 48 || lastChar > 57) {
