@@ -1,5 +1,6 @@
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -64,12 +65,12 @@ class HillCipherEngine {
     public HillCipherEngine(int radix, int size, File plainTextFile, String keyString) {
         this.radix = radix;
         this.blocksize = size;
-        this.keyMatrix = createKeyMatrix(size, keyString);
+        this.keyMatrix = parseKeyMatrix(size, keyString);
         this.plainTextFile = plainTextFile;
         readingProgress = -1;
     }
 
-    private int[][] createKeyMatrix(int size, String keyString) {
+    private int[][] parseKeyMatrix(int size, String keyString) {
         String[] textLines = keyString.split("\\R");
         int[][] keyMatix = new int[size][size];
         if (textLines.length > size) {
@@ -103,29 +104,27 @@ class HillCipherEngine {
             int tempByte;
             int offset = 0;
             int[] loadedNumbers = new int[blocksize];
-            StringBuilder currentRow = new StringBuilder();
+            StringBuilder currentFullNumber = new StringBuilder();
             int numOfNumbersAdded = 0;
-
             while (readingProgress < fileReader.length()) {
                 fileReader.seek(++readingProgress);
                 tempByte = fileReader.read();
                 if (isSpaceOrNewLine(tempByte)) {
                     System.out.print(" "); // Debug print
                     numOfNumbersAdded++;
-                    int integerToAdd = Integer.parseInt(currentRow.toString());
-                    if (integerToAdd > 25) throw new IllegalArgumentException("Numbers larger than 25 are not accepted");
+                    int integerToAdd = Integer.parseInt(currentFullNumber.toString());
                     loadedNumbers[offset++] = integerToAdd;
-                    currentRow.setLength(0);
+                    currentFullNumber.setLength(0);
                     if (offset == blocksize) {
                         for (int i : encryptArray(loadedNumbers)) {
                             finalCrypto.add(i);
                         }
                         offset = 0;
-                        loadedNumbers = new int[]{-1, -1, -1};
+                        Arrays.fill(loadedNumbers, -1);
                     }
                 } else {
                     System.out.print((char) tempByte); // Debug print
-                    currentRow.append((char) tempByte);
+                    currentFullNumber.append((char) tempByte);
                 }
             }
             return addPadding(finalCrypto,loadedNumbers, numOfNumbersAdded);

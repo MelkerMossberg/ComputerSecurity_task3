@@ -1,3 +1,4 @@
+import javax.annotation.processing.SupportedSourceVersion;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
@@ -64,12 +65,12 @@ class HillDecipherEngine {
     public HillDecipherEngine(int radix, int size, File plainTextFile, String keyString) {
         this.radix = radix;
         this.size = size;
-        this.keyMatrix = createKeyMatrix(size, keyString);
+        this.keyMatrix = parseKeyMatrix(size, keyString);
         this.plainTextFile = plainTextFile;
         readingProgress = -1;
     }
 
-    private int[][] createKeyMatrix(int size, String keyString) {
+    private int[][] parseKeyMatrix(int size, String keyString) {
         String[] textLines = keyString.split("\\R");
         int[][] keyMatix = new int[size][size];
         if (textLines.length > size) {
@@ -111,11 +112,10 @@ class HillDecipherEngine {
                     System.out.print(" ");
                     loadedNumbers[offset++] = Integer.parseInt(currentRow.toString());
                     currentRow.setLength(0);
-                    if (offset == size) { //Array is loaded to full size
+                    if (offset == size) {
                         for (int i : decryptArray(loadedNumbers)) {
                             finalDecrypted.add(i);
-                        }
-                        ;
+                        };
                         offset = 0;
                     }
                 } else {
@@ -123,11 +123,6 @@ class HillDecipherEngine {
                     currentRow.append((char) tempByte);
                 }
             }
-            /*
-            int[] result = new int[finalDecrypted.size()];
-            for (int i = 0; i < finalDecrypted.size(); i++) {
-                result[i] = (int) finalDecrypted.get(i);
-            }*/
             return removePadding(finalDecrypted);
         } catch (FileNotFoundException e) {
             System.err.println("The file '" + this.plainTextFile.getName() + "' was not found. Shutting down...");
@@ -149,6 +144,8 @@ class HillDecipherEngine {
         for (int i = 0; i < finalLength; i++){
             result[i] = (int)finalDecrypted.get(i);
         }
+        System.out.println("\ndecrypted"); // Debug text
+        for (int j:result) System.out.print(j + ", ");
         return result;
     }
 

@@ -24,6 +24,8 @@ public class HillKeys {
         while(generatedKey == null || !isInvertible(generatedKey)){
             generatedKey = generateRandomMatrix();
         }
+        System.out.println(generatedKey.inverse().toString().replaceAll("[{]|[}]", ""));
+        System.out.println();
         writeKeyToFile(generatedKey);
     }
 
