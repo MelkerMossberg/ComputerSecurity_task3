@@ -1,3 +1,7 @@
+import org.jscience.mathematics.number.LargeInteger;
+import org.jscience.mathematics.number.ModuloInteger;
+import org.jscience.mathematics.vector.DenseMatrix;
+
 import javax.annotation.processing.SupportedSourceVersion;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -88,7 +92,34 @@ class HillDecipherEngine {
                 }
             }
         }
+        if (! keyMatrixIsInvertible(keyMatix)) throw new IllegalArgumentException("The key provided is not invertible.");
         return keyMatix;
+    }
+
+    private boolean keyMatrixIsInvertible(int[][] keyMatrix) {
+        for (int[] row: keyMatrix) {
+            for (int a : row) System.out.print(a + ", ");
+            System.out.println();
+        }
+        ModuloInteger[][] values = new ModuloInteger[size][size];
+        for(int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                values[i][j] = ModuloInteger.valueOf(
+                        LargeInteger.valueOf(keyMatrix[i][j])
+                );
+            }
+        }
+        try {
+            System.out.println();
+            System.out.println(DenseMatrix.valueOf(values).toString());
+            DenseMatrix.valueOf(values).inverse();
+            System.exit(1);
+            return true;
+        } catch (ArithmeticException e) {
+            System.out.println("Arithmetic error");
+            System.exit(1);
+            return false;
+        }
     }
 
     public int[] decrypt() {

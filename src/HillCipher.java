@@ -10,6 +10,7 @@ public class HillCipher {
         try{
             int radix = Integer.parseInt(args[0]);
             int size = Integer.parseInt(args[1]);
+            System.out.println("Size: " + size); //Debug
             File plainTextFile = new File(args[3]);
             String keyString = readTxtFile(new File(args[2]));
             String requestedFileName = args[4];
@@ -61,6 +62,7 @@ class HillCipherEngine {
     File plainTextFile;
     int readingProgress;
     int[][] keyMatrix;
+    int howLongToRead;
 
     public HillCipherEngine(int radix, int size, File plainTextFile, String keyString) {
         this.radix = radix;
@@ -74,13 +76,13 @@ class HillCipherEngine {
         String[] textLines = keyString.split("\\R");
         int[][] keyMatix = new int[size][size];
         if (textLines.length > size) {
-            System.out.println("Key does not match size");
+            System.out.println("Num of rows in key does not match size");
             return null;
         }
         for (int line = 0; line < textLines.length; line++) {
             String[] numbers = textLines[line].split(" ");
             if (numbers.length > size) {
-                System.out.println("Key does not match size");
+                System.out.println("Num of columns in key do not match size");
                 return null;
             }
             for (int x = 0; x < size; x++) {
@@ -106,7 +108,7 @@ class HillCipherEngine {
             int[] loadedNumbers = new int[blocksize];
             StringBuilder currentFullNumber = new StringBuilder();
             int numOfNumbersAdded = 0;
-            while (readingProgress < fileReader.length()) {
+            while (readingProgress < howLongToRead) {
                 fileReader.seek(++readingProgress);
                 tempByte = fileReader.read();
                 if (isSpaceOrNewLine(tempByte)) {
@@ -165,6 +167,7 @@ class HillCipherEngine {
 
     private void validateFormatFirstAndLastIndex(RandomAccessFile fileReader) {
         try {
+            this.howLongToRead = ((int)fileReader.length());
             fileReader.seek(0);
             char firstChar = ((char) (int) fileReader.read());
             if (firstChar < 48 || firstChar > 57) {
@@ -173,8 +176,12 @@ class HillCipherEngine {
             }
             fileReader.seek(fileReader.length() - 1);
             char lastChar = ((char) (int) fileReader.read());
-            if (lastChar < 48 || lastChar > 57) {
-                System.err.print(lastChar + "Formatting of last character in input file is wrong. Check if 'space' or 'newline' has been added.");
+            if (lastChar < 48) {
+                System.out.println(lastChar + "The last character was 'newline', thus removed. Continue running.");
+                this.howLongToRead = howLongToRead -1;
+            }
+            if (lastChar > 57) {
+                System.err.print(lastChar + "Formatting of last character in input file is wrong. Check if 'space' has been added.");
                 System.exit(1);
             }
         } catch (IOException e) {
