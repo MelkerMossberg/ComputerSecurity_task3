@@ -1,10 +1,11 @@
 import org.jscience.mathematics.number.LargeInteger;
 import org.jscience.mathematics.number.ModuloInteger;
 import org.jscience.mathematics.vector.DenseMatrix;
+import org.jscience.mathematics.vector.DenseVector;
 
-import javax.annotation.processing.SupportedSourceVersion;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class HillDecipher {
@@ -48,6 +49,8 @@ public class HillDecipher {
             BufferedReader br = new BufferedReader(new FileReader(plainText));
             String st;
             while ((st = br.readLine()) != null) sb.append(st+"\n");
+            System.out.print(sb.toString());
+            while (sb.charAt(sb.length()-1) == 10) sb.deleteCharAt(sb.length()-1);
             return sb.toString();
         } catch (FileNotFoundException e) {
             System.err.println("The file '" + plainText.getName() + "' was not found. Quitting...\n");
@@ -92,11 +95,13 @@ class HillDecipherEngine {
                 }
             }
         }
-        if (! keyMatrixIsInvertible(keyMatix)) throw new IllegalArgumentException("The key provided is not invertible.");
+        ModuloInteger.setModulus(LargeInteger.valueOf(radix));
+        testKeyMatrixIsInvertible(keyMatix);
         return keyMatix;
     }
 
-    private boolean keyMatrixIsInvertible(int[][] keyMatrix) {
+    private void testKeyMatrixIsInvertible(int[][] keyMatrix) {
+        ModuloInteger.setModulus(LargeInteger.valueOf(radix));
         for (int[] row: keyMatrix) {
             for (int a : row) System.out.print(a + ", ");
             System.out.println();
@@ -111,18 +116,17 @@ class HillDecipherEngine {
         }
         try {
             System.out.println();
-            System.out.println(DenseMatrix.valueOf(values).toString());
-            DenseMatrix.valueOf(values).inverse();
-            System.exit(1);
-            return true;
+            DenseMatrix<ModuloInteger> originalMatrix = DenseMatrix.valueOf(values);
+            System.out.println("ORIGINAL INVERTED MATRIX");
+            System.out.println(originalMatrix);
+            originalMatrix.inverse();
         } catch (ArithmeticException e) {
-            System.out.println("Arithmetic error");
-            System.exit(1);
-            return false;
+            System.out.println(e);
+            throw new ArithmeticException(e.getMessage());
         }
     }
 
-    public int[] decrypt() {
+    int[] decrypt() {
         LinkedList finalDecrypted = new LinkedList();
         try {
             RandomAccessFile fileReader = new RandomAccessFile(plainTextFile, "r");

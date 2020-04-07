@@ -1,3 +1,7 @@
+import org.jscience.mathematics.number.LargeInteger;
+import org.jscience.mathematics.number.ModuloInteger;
+import org.jscience.mathematics.vector.DenseMatrix;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -74,7 +78,7 @@ class HillCipherEngine {
 
     private int[][] parseKeyMatrix(int size, String keyString) {
         String[] textLines = keyString.split("\\R");
-        int[][] keyMatix = new int[size][size];
+        int[][] parsedKeyMatix = new int[size][size];
         if (textLines.length > size) {
             System.out.println("Num of rows in key does not match size");
             return null;
@@ -87,7 +91,7 @@ class HillCipherEngine {
             }
             for (int x = 0; x < size; x++) {
                 try {
-                    keyMatix[line][x] = Integer.parseInt(numbers[x]);
+                    parsedKeyMatix[line][x] = Integer.parseInt(numbers[x]);
                 } catch (NumberFormatException e) {
                     System.err.print("One or more key matrix elements cannot be parsed as Integers..");
                     System.exit(1);
@@ -95,7 +99,30 @@ class HillCipherEngine {
 
             }
         }
-        return keyMatix;
+        testKeyMatrixIsInvertible(parsedKeyMatix);
+        return parsedKeyMatix;
+    }
+    private void testKeyMatrixIsInvertible(int[][] keyMatrix) {
+        try{
+            ModuloInteger.setModulus(LargeInteger.valueOf(radix));
+            ModuloInteger[][] values = new ModuloInteger[blocksize][blocksize];
+            for(int i = 0; i < blocksize; i++) {
+                for (int j = 0; j < blocksize; j++) {
+                    values[i][j] = ModuloInteger.valueOf(
+                            LargeInteger.valueOf(keyMatrix[i][j])
+                    );
+                }
+            }
+            DenseMatrix<ModuloInteger> originalMatrix = DenseMatrix.valueOf(values);
+            System.out.println("\nORIGINAL MATRIX");
+            System.out.println(originalMatrix);
+            originalMatrix.inverse();
+        } catch (ArithmeticException e) {
+            System.err.println(e);
+            throw new ArithmeticException(e.getMessage());
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public int[] encrypt() {

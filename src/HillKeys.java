@@ -84,7 +84,8 @@ public class HillKeys {
     private static boolean isInvertible(DenseMatrix<ModuloInteger> matrix) {
         try {
             //System.out.println(matrix.inverse().toString().replaceAll("[{]|[}]", ""));
-            matrix.inverse();
+            DenseMatrix<ModuloInteger> first = matrix.inverse();
+            first.inverse();
             return true;
         } catch (ArithmeticException e) {
             return false;
